@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Generador de firma – Dasbanq</title>
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ---------- Base ---------- */
+      body {
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+        padding: 40px;
+        box-sizing: border-box;
+      }
+
+      /* ---------- Form ---------- */
+      .form-wrapper {
+        max-width: 420px;
+        width: 100%;
+        padding: 28px;
+      }
+
+      .form-wrapper h3 {
+        margin: 0 0 20px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2933;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .form-group input:focus {
+        border-color: #343a40;
+        box-shadow: 0 0 0 2px rgba(52, 58, 64, 0.12);
+      }
+
+      .form-wrapper button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        background-color: #343a40;
+        color: #ffffff;
+        transition: background-color 0.2s, transform 0.1s;
+        font-family: "Poppins", sans-serif;
+      }
+
+      .form-wrapper button:hover {
+        background-color: #1f2933;
+      }
+
+      .form-wrapper button:active {
+        transform: scale(0.98);
+      }
+
+      /* ---------- Copiar firma ---------- */
+      .copy-button {
+        padding: 10px 20px;
+        font-family: "Poppins", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        background-color: #ffffff;
+        color: #343a40;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+      }
+
+      .copy-button:hover {
+        background-color: #f3f4f6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .copy-button:active {
+        transform: scale(0.97);
+      }
+
+      .copy-tooltip {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 6px;
+        background-color: #111827;
+        color: #ffffff;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+      }
+
+      .copy-tooltip.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-4px);
+        }
+        40% {
+          transform: translateX(4px);
+        }
+        60% {
+          transform: translateX(-4px);
+        }
+        80% {
+          transform: translateX(4px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      .shake {
+        animation: shake 0.35s;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="layout">
+      <!-- FORMULARIO -->
+      <div class="form-wrapper">
+        <h3>Generar firma para email</h3>
+
+        <div class="form-group">
+          <label>Nombre</label>
+          <input
+            id="inputNombre"
+            type="text"
+            placeholder="Nombre y apellido"
+            oninput="document.getElementById('formTooltip').classList.remove('show')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Cargo</label>
+          <input
+            id="inputCargo"
+            type="text"
+            placeholder="Cargo"
+            oninput="document.getElementById('formTooltip').classList.remove('show')"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input
+            id="inputCorreo"
+            type="email"
+            placeholder="email@dasbanq.com"
+            oninput="document.getElementById('formTooltip').classList.remove('show')"
+          />
+        </div>
+
+        <button id="btnGenerar" onclick="generarFirma()">Generar firma</button>
+        <span id="formTooltip" class="copy-tooltip">
+          ⚠️ Completá todos los campos
+        </span>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="preview-wrapper">
+        <div id="firma">
+          <div style="padding-left: 100px">
+            <br /><br />
+
+            <h1
+              id="nombre"
+              style="
+                font-size: 14px;
+                color: #343a40;
+                font-weight: 600;
+                line-height: 18px;
+              "
+            >
+              Nombre y apellido
+            </h1>
+
+            <div style="margin-left: 1px">
+              <h2
+                id="cargo"
+                style="
+                  font-size: 11px;
+                  color: #343a40;
+                  text-transform: uppercase;
+                  letter-spacing: 2px;
+                  font-weight: 400;
+                "
+              >
+                Cargo
+              </h2>
+
+              <div class="contacto" style="margin-bottom: 16px">
+                <p style="font-size: 12px">
+                  <img
+                    style="margin-right: 3px; vertical-align: middle"
+                    width="16"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/mail.png"
+                  />
+                  <a
+                    href="mailto:email@dasbanq.com"
+                    id="correo"
+                    style="
+                      color: #545d66;
+                      text-decoration: none;
+                      vertical-align: middle;
+                    "
+                  >
+                    email@dasbanq.com
+                  </a>
+                </p>
+              </div>
+            </div>
+
+            <div class="footer">
+              <div
+                class="logo"
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 26px;
+                "
+              >
+                <a target="_blank" href="https://dasbanq.com/">
+                  <img
+                    width="40"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/animacion-isotipo.gif"
+                  />
+                </a>
+              </div>
+
+              <div
+                class="social-icons"
+                style="display: inline-block; vertical-align: middle"
+              >
+                <a
+                  style="text-decoration: none; margin-right: 7px"
+                  target="_blank"
+                  href="https://www.facebook.com/profile.php?id=100090120932556"
+                >
+                  <img
+                    width="26"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/facebook.png"
+                  />
+                </a>
+                <a
+                  style="text-decoration: none; margin-right: 7px"
+                  target="_blank"
+                  href="https://www.instagram.com/dasbanq/"
+                >
+                  <img
+                    width="26"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/instagram.png"
+                  />
+                </a>
+                <a
+                  style="text-decoration: none; margin-right: 7px"
+                  target="_blank"
+                  href="https://www.linkedin.com/company/dasbanq/"
+                >
+                  <img
+                    width="26"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/linkedin.png"
+                  />
+                </a>
+                <a
+                  style="text-decoration: none; margin-right: 7px"
+                  target="_blank"
+                  href="https://www.tiktok.com/@dasbanq"
+                >
+                  <img
+                    width="26"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/tiktok.png"
+                  />
+                </a>
+                <a
+                  style="text-decoration: none; margin-right: 7px"
+                  target="_blank"
+                  href="https://x.com/dasbanq"
+                >
+                  <img
+                    width="26"
+                    src="https://gastonmourelle.github.io/firmas-email-dasbanq/assets/ico/x.png"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COPIAR FIRMA -->
+      <div style="margin-top: 20px; text-align: center">
+        <button onclick="copiarFirma()" class="copy-button">
+          Copiar firma
+        </button>
+        <span id="copyTooltip" class="copy-tooltip">✅ Firma copiada</span>
+      </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      function generarFirma() {
+        const nombre = document.getElementById("inputNombre").value;
+        const cargo = document.getElementById("inputCargo").value;
+        const correo = document.getElementById("inputCorreo").value;
+
+        if (!nombre || !cargo || !correo) {
+          const tooltip = document.getElementById("formTooltip");
+          tooltip.classList.add("show");
+
+          setTimeout(() => {
+            tooltip.classList.remove("show");
+          }, 1800);
+
+          const boton = document.getElementById("btnGenerar");
+          boton.classList.add("shake");
+
+          setTimeout(() => {
+            boton.classList.remove("shake");
+          }, 400);
+
+          return;
+        }
+
+        document.getElementById("nombre").textContent = nombre;
+        document.getElementById("cargo").textContent = cargo;
+
+        const correoEl = document.getElementById("correo");
+        correoEl.textContent = correo;
+        correoEl.setAttribute("href", "mailto:" + correo);
+      }
+      function copiarFirma() {
+        const firma = document.getElementById("firma");
+
+        const range = document.createRange();
+        range.selectNode(firma);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        document.execCommand("copy");
+        selection.removeAllRanges();
+
+        const tooltip = document.getElementById("copyTooltip");
+        tooltip.classList.add("show");
+
+        setTimeout(() => {
+          tooltip.classList.remove("show");
+        }, 1800);
+      }
+    </script>
+  </body>
+</html>
